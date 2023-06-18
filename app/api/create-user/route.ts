@@ -10,37 +10,13 @@ interface newUser {
 
 
 export async function POST(req: Request){
-    /* const {name, email, password} = await req.json()
-
-    const user = await userExists(email)
-    if(!user){
-        const newUser = await createUser({name, email, password})
-        return new Response(JSON.stringify(newUser))
-    }
-    return new Response(JSON.stringify(user)) */
-
     const body:newUser = await req.json();
-
-    const user = await prisma.user.findUnique({
-        where: {
-            email : body.email
-        }
-    })
-
-    /* if(!user){
-        const newUser = await prisma.user.create({
-            data: {
-                email: body.email,
-                name: body.name,
-                password: await bcrypt.hash(body.password, 10)
-            }
-        })
-
-        if(newUser) return new Response(JSON.stringify(newUser))
-        else return new Response(JSON.stringify(null))
-    }else return new Response(JSON.stringify({
-        error: 'Account already registered'
-    })) */
+    const user = await userExists(body.email)
+    if(!user){
+        const newUser = await createUser(body)
+        if(newUser) return new Response(JSON.stringify({res: 'Account Successfuly Registered'}))
+        else return new Response(JSON.stringify({res: 'Error'}))
+    }else return new Response(JSON.stringify({res: 'Error'}))
 }
 
 
@@ -51,7 +27,6 @@ const userExists = async (email: string) => {
             email: email
         }
     })
-
     return user;
 }
 
@@ -61,10 +36,8 @@ const createUser = async (obj: newUser) => {
         data: {
             name: obj.name,
             email: obj.email,
-            password: await bcrypt.hash(obj.password, 10),
-            profilePicture: 'finto'
+            password: await bcrypt.hash(obj.password, 10)
         }
     })
-
     return user;
 }
